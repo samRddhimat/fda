@@ -57,11 +57,11 @@ df_flight.createOrReplaceTempView(temp_table_name)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC
-# MAGIC /* Query the created temp table in a SQL cell */
-# MAGIC
-# MAGIC select * from `flightData`
+# %sql
+
+#Query the created temp table in a SQL cell */
+
+# select * from `flightData`*/
 
 # COMMAND ----------
 
@@ -69,18 +69,6 @@ import pyspark.sql.functions as sqlf
 # df_flight.show(10)
 df_flight2 = df_flight.withColumn("journey_month",sqlf.lit(sqlf.month('journey_date'))).drop("journey_date")
 df_flight2.printSchema()
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
 
 # COMMAND ----------
 
@@ -116,13 +104,27 @@ df_pass.show(10)
 # df_pass.select("fname","lname").distinct().count() #15496
 # df_pass.orderBy("fname","lname").show()
 
-df_stage = df_flight2.join(df_pass, df_pass.pid == df_flight2.pid, "inner")
-    # .select("df_flight2.*","df_pass.fname")"
+# df_stage = df_flight2.join(df_pass, df_pass.pid == df_flight2.pid, "inner") \
+#      .select("df_flight2.*","df_pass.fname")
+# df_stage.show()
+
+df_stage = df_flight2.join(df_pass, df_pass.pid == df_flight2.pid, "inner").select(df_flight2["*"],df_pass["lname"])
+
 df_stage.show()
 
 # COMMAND ----------
 
-df_stage.groupBy("pid").count().show()
+df_stage
+
+# COMMAND ----------
+
+import pyspark.sql.functions as fnsql #row_number
+
+df_stage.select("*").groupBy("pid") \
+    .agg(fnsql.count("pid").alias("countx"))\
+        .filter(fnsql.col("countx") >20).show()
+
+
 
 # COMMAND ----------
 
